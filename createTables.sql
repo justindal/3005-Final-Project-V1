@@ -1,6 +1,6 @@
 CREATE TABLE countries
 (
-    country_id   SERIAL PRIMARY KEY,
+    country_id   INT PRIMARY KEY,
     country_name VARCHAR(255)
 );
 
@@ -13,16 +13,14 @@ CREATE TABLE season
 
 CREATE TABLE competition
 (
-    id                        SERIAL PRIMARY KEY,
     competition_id            INT,
     competition_name          VARCHAR(255),
     competition_gender        VARCHAR(50),
     competition_youth         BOOLEAN,
     competition_international BOOLEAN,
-    country_id                INT,
     season_id                 INT,
-    FOREIGN KEY (season_id) REFERENCES season (season_id),
-    FOREIGN KEY (country_id) REFERENCES countries (country_id)
+    country_name              VARCHAR(255),
+    FOREIGN KEY (season_id) REFERENCES season (season_id)
 );
 
 CREATE TABLE team
