@@ -129,8 +129,11 @@ def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []):
                         manager_in_db = cursor.fetchone()
                         if manager_in_db is None:
                             cursor.execute(
-                                'INSERT INTO manager (manager_id, manager_name, country_id) VALUES (%s, %s, %s)',
-                                (manager['id'], manager['name'], manager['country']['id'])
+                                'INSERT INTO manager'
+                                '(manager_id, manager_name, country_id, manager_dob, manager_nickname)'
+                                'VALUES (%s, %s, %s, %s, %s)',
+                                (manager['id'], manager['name'], manager['country']['id'], manager['dob'],
+                                 manager['nickname'])
                             )
 
                 # Check if 'managers' key exists in away team and it's not empty
@@ -156,8 +159,11 @@ def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []):
                         manager_in_db = cursor.fetchone()
                         if manager_in_db is None:
                             cursor.execute(
-                                'INSERT INTO manager (manager_id, manager_name, country_id) VALUES (%s, %s, %s)',
-                                (manager['id'], manager['name'], manager['country']['id'])
+                                'INSERT INTO manager '
+                                '(manager_id, manager_name, country_id, manager_dob, manager_nickname) '
+                                'VALUES (%s, %s, %s, %s, %s)',
+                                (manager['id'], manager['name'], manager['country']['id'], manager['dob'],
+                                 manager['nickname'])
                             )
 
                 # check if stadium in match
