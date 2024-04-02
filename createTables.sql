@@ -151,7 +151,7 @@ CREATE TABLE pass_type
 
 CREATE TABLE match_event
 (
-    event_id        INT PRIMARY KEY,
+    event_id        uuid PRIMARY KEY,
     event_index     INT,
     period          INT,
     event_timestamp TIME,
@@ -185,7 +185,7 @@ CREATE TABLE pass
     pass_type_id      INT,
     pass_location     VARCHAR(255),
     pass_recipient_id INT,
-    event_id          INT,
+    event_id          uuid,
     FOREIGN KEY (pass_height_id) REFERENCES pass_height (height_id),
     FOREIGN KEY (pass_body_part_id) REFERENCES pass_body_part (body_part_id),
     FOREIGN KEY (pass_type_id) REFERENCES pass_type (pass_type_id),
@@ -212,7 +212,7 @@ CREATE TABLE lineup
 
 CREATE TABLE tactics
 (
-    event_id  INT,
+    event_id  uuid,
     formation VARCHAR(255),
     PRIMARY KEY (event_id),
     FOREIGN KEY (event_id) REFERENCES match_event (event_id)
