@@ -151,20 +151,22 @@ CREATE TABLE pass_type
 
 CREATE TABLE match_event
 (
-    event_id        uuid PRIMARY KEY,
-    event_index     INT,
-    period          INT,
-    event_timestamp TIME,
-    minute          INT,
-    second          INT,
-    possession      INT,
-    duration        DECIMAL(10, 2),
-    event_type_id   INT,
-    team_id         INT,
-    player_id       INT,
-    position_id     INT,
-    match_id        INT,
-    pass_id         INT,
+    event_id           uuid PRIMARY KEY,
+    event_index        INT,
+    period             INT,
+    event_timestamp    TIMESTAMP,
+    minute             INT,
+    second             INT,
+    possession         INT,
+    possession_team_id INT,
+    play_pattern_id    INT,
+    duration           DECIMAL(10, 3),
+    event_type_id      INT,
+    team_id            INT,
+    player_id          INT,
+    position_id        INT,
+    match_id           INT,
+    pass_id            INT,
     FOREIGN KEY (event_type_id) REFERENCES event_type (type_id),
     FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
@@ -177,7 +179,7 @@ CREATE TABLE pass
     pass_id           INT PRIMARY KEY,
     location_x        DECIMAL(10, 2),
     location_y        DECIMAL(10, 2),
-    pass_duration     DECIMAL(10, 2),
+    pass_duration     DECIMAL(10, 3),
     pass_length       DECIMAL(10, 2),
     pass_angle        DECIMAL(10, 2),
     pass_height_id    INT,
@@ -201,8 +203,7 @@ CREATE TABLE play_pattern
 
 CREATE TABLE lineup
 (
-    lineup_id INT PRIMARY KEY,
-    team_id   INT,
+    team_id   INT PRIMARY KEY,
     match_id  INT,
     player_id INT,
     FOREIGN KEY (team_id) REFERENCES team (team_id),
@@ -220,9 +221,12 @@ CREATE TABLE tactics
 
 CREATE TABLE lineup_player
 (
-    lineup_id INT,
-    player_id INT,
-    PRIMARY KEY (lineup_id, player_id),
-    FOREIGN KEY (lineup_id) REFERENCES lineup (lineup_id),
-    FOREIGN KEY (player_id) REFERENCES player (player_id)
+    event_id      uuid,
+    player_id     INT,
+    position_id   INT,
+    jersey_number INT,
+    PRIMARY KEY (event_id, player_id),
+    FOREIGN KEY (event_id) REFERENCES tactics (event_id),
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
+    FOREIGN KEY (position_id) REFERENCES position (position_id)
 );
