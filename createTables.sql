@@ -158,7 +158,6 @@ CREATE TABLE match_event
     minute             INT,
     second             INT,
     possession         INT,
-    possession_team_id INT,
     play_pattern_id    INT,
     duration           DECIMAL(10, 3),
     event_type_id      INT,
@@ -167,6 +166,11 @@ CREATE TABLE match_event
     position_id        INT,
     match_id           INT,
     pass_id            INT,
+    location_x         DECIMAL(10, 2),
+    location_y         DECIMAL(10, 2),
+    under_pressure     BOOLEAN,
+    off_camera         BOOLEAN,
+    out                BOOLEAN,
     FOREIGN KEY (event_type_id) REFERENCES event_type (type_id),
     FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
@@ -214,7 +218,7 @@ CREATE TABLE lineup
 CREATE TABLE tactics
 (
     event_id  uuid,
-    formation VARCHAR(255),
+    formation int,
     PRIMARY KEY (event_id),
     FOREIGN KEY (event_id) REFERENCES match_event (event_id)
 );
