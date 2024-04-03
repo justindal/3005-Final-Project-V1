@@ -88,7 +88,7 @@ def populate_from_competitions(cursor: psycopg.cursor) -> None:
 
 
 # data from matches folder
-def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []):
+def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []) -> None:
     for file in match_file_paths:
         with open(file) as f:
             data = json.load(f)
@@ -314,6 +314,39 @@ def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []):
                 )
 
 
+# populate from events folder TODO
+def populate_from_events(cursor: psycopg.cursor, event_file_paths: []) -> None:
+    for file in event_file_paths:
+        with open(file) as f:
+            data = json.load(f)
+            for event in data:
+                # check if event type exists
+                cursor.execute('SELECT type_id FROM event_type WHERE type_id = %s',
+                               (event['type']['id'],))
+                event_type = cursor.fetchone()
+                if event_type is None:
+                    # add event type to database
+                    cursor.execute(
+                        'INSERT INTO event_type (type_id, type_name) VALUES (%s, %s)',
+                        (event['type']['id'], event['type']['name'])
+                    )
+
+                # check if play pattern exists
+                cursor.execute('SELECT play_pattern_id FROM play_pattern WHERE play_pattern_id = %s',
+                               (event['play_pattern']['id'],))
+                play_pattern = cursor.fetchone()
+                if play_pattern is None:
+                    # add play pattern to database
+                    cursor.execute(
+                        'INSERT INTO play_pattern (play_pattern_id, play_pattern_name) VALUES (%s, %s)',
+                        (event['play_pattern']['id'], event['play_pattern']['name'])
+                    )
+
+                # load event data
+                if 'tactics' in event:
+                    pass
+
+
 def create_tables(cursor: psycopg.cursor):
     # get file named createTables.sql
     with open('createTables.sql', 'r') as file:
@@ -335,13 +368,14 @@ def main():
     )
     cursor = connection.cursor()
 
+    # competition_ids, season_ids, match_ids, match_file_paths, event_file_paths, lineup_file_paths
     data = get_relevant_data()
 
     drop_tables(cursor)
     create_tables(cursor)
     populate_from_competitions(cursor)
     populate_from_matches(cursor, data[3])
-    # print(data[3][0])
+    populate_from_events(cursor, data[4])
 
     connection.commit()
     cursor.close()
