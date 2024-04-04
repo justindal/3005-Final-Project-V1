@@ -455,7 +455,7 @@ CREATE TABLE event_pass_type
     backheel BOOLEAN,
     deflected BOOLEAN,
     miscommunication BOOLEAN,
-    is_cross BOOLEAN,
+    "cross" BOOLEAN,
     cutback BOOLEAN,
     switch BOOLEAN,
     shot_assist BOOLEAN,
