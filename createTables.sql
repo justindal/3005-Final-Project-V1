@@ -110,6 +110,12 @@ CREATE TABLE position
     position_name VARCHAR(255)
 );
 
+CREATE TABLE play_pattern
+(
+    play_pattern_id   INT PRIMARY KEY,
+    play_pattern_name VARCHAR(255)
+);
+
 CREATE TABLE player_position
 (
     player_id    INT,
@@ -151,31 +157,34 @@ CREATE TABLE pass_type
 
 CREATE TABLE match_event
 (
-    event_id        uuid PRIMARY KEY,
-    event_index     INT,
-    period          INT,
-    event_timestamp TIMESTAMP,
-    minute          INT,
-    second          INT,
-    possession      INT,
-    play_pattern_id INT,
-    duration        DECIMAL(10, 3),
-    event_type_id   INT,
-    team_id         INT,
-    player_id       INT,
-    position_id     INT,
-    match_id        INT,
-    pass_id         INT,
-    location_x      DECIMAL(10, 2),
-    location_y      DECIMAL(10, 2),
-    under_pressure  BOOLEAN,
-    off_camera      BOOLEAN,
-    out             BOOLEAN,
+    event_id           uuid PRIMARY KEY,
+    event_index        INT,
+    period             INT,
+    event_timestamp    varchar(255),
+    minute             INT,
+    second             INT,
+    possession         INT,
+    possession_team_id INT,
+    play_pattern_id    INT,
+    duration           DECIMAL(10, 3),
+    event_type_id      INT,
+    team_id            INT,
+    player_id          INT,
+    position_id        INT,
+    match_id           INT,
+    pass_id            INT,
+    location_x         DECIMAL(10, 2),
+    location_y         DECIMAL(10, 2),
+    under_pressure     BOOLEAN,
+    off_camera         BOOLEAN,
+    out                BOOLEAN,
     FOREIGN KEY (event_type_id) REFERENCES event_type (type_id),
     FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (position_id) REFERENCES position (position_id),
-    FOREIGN KEY (match_id) REFERENCES match (match_id)
+    FOREIGN KEY (match_id) REFERENCES match (match_id),
+    FOREIGN KEY (pass_id) REFERENCES pass_type (pass_type_id),
+    FOREIGN KEY (play_pattern_id) REFERENCES play_pattern (play_pattern_id)
 );
 
 CREATE TABLE pass
@@ -197,12 +206,6 @@ CREATE TABLE pass
     FOREIGN KEY (pass_type_id) REFERENCES pass_type (pass_type_id),
     FOREIGN KEY (pass_recipient_id) REFERENCES player (player_id),
     FOREIGN KEY (event_id) REFERENCES match_event (event_id)
-);
-
-CREATE TABLE play_pattern
-(
-    play_pattern_id   INT PRIMARY KEY,
-    play_pattern_name VARCHAR(255)
 );
 
 CREATE TABLE lineup
@@ -409,30 +412,30 @@ CREATE TABLE event_half_end
 
 CREATE TABLE event_half_start
 (
-    type_id INT PRIMARY KEY,
+    type_id          INT PRIMARY KEY,
     late_video_start BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_injury_stoppage
 (
-    type_id INT PRIMARY KEY,
+    type_id  INT PRIMARY KEY,
     in_chain BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_interception
 (
-    type_id      INT PRIMARY KEY,
-    outcome_id   INT,
+    type_id    INT PRIMARY KEY,
+    outcome_id INT,
     FOREIGN KEY (outcome_id) references outcome (outcome_id),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_miscontrol
 (
-    type_id      INT PRIMARY KEY,
-    aerial_won    BOOLEAN,
+    type_id    INT PRIMARY KEY,
+    aerial_won BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
@@ -444,26 +447,26 @@ CREATE TABLE recipient_type
 
 CREATE TABLE event_pass_type
 (
-    type_id INT PRIMARY KEY,
+    type_id           INT PRIMARY KEY,
     recipient_type_id INT,
-    length DECIMAL(10, 2),
-    angle  DECIMAL(10, 2),
-    height_id INT,
-    end_location_x DECIMAL(10, 2),
-    end_location_y DECIMAL(10, 2),
-    assisted_shot_id uuid,
-    backheel BOOLEAN,
-    deflected BOOLEAN,
-    miscommunication BOOLEAN,
-    "cross" BOOLEAN,
-    cutback BOOLEAN,
-    switch BOOLEAN,
-    shot_assist BOOLEAN,
-    goal_assist BOOLEAN,
-    body_part_id INT,
-    pass_type_id INT,
-    outcome_id INT,
-    technique_id INT,
+    length            DECIMAL(10, 2),
+    angle             DECIMAL(10, 2),
+    height_id         INT,
+    end_location_x    DECIMAL(10, 2),
+    end_location_y    DECIMAL(10, 2),
+    assisted_shot_id  uuid,
+    backheel          BOOLEAN,
+    deflected         BOOLEAN,
+    miscommunication  BOOLEAN,
+    "cross"           BOOLEAN,
+    cutback           BOOLEAN,
+    switch            BOOLEAN,
+    shot_assist       BOOLEAN,
+    goal_assist       BOOLEAN,
+    body_part_id      INT,
+    pass_type_id      INT,
+    outcome_id        INT,
+    technique_id      INT,
     FOREIGN KEY (recipient_type_id) REFERENCES recipient_type (recipient_type_id),
     FOREIGN KEY (height_id) REFERENCES pass_height (height_id),
     FOREIGN KEY (body_part_id) REFERENCES pass_body_part (body_part_id),
@@ -475,14 +478,14 @@ CREATE TABLE event_pass_type
 
 CREATE TABLE event_player_off
 (
-    type_id INT PRIMARY KEY,
+    type_id   INT PRIMARY KEY,
     permanent BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_pressure
 (
-    type_id INT PRIMARY KEY,
+    type_id      INT PRIMARY KEY,
     counterpress BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
@@ -496,11 +499,11 @@ CREATE TABLE location
 
 CREATE TABLE freeze_frame_type
 (
-    freeze_frame_type_id   INT PRIMARY KEY,
-    location_id            INT,
-    player_id              INT,
-    position_id            INT,
-    teammate              BOOLEAN,
+    freeze_frame_type_id INT PRIMARY KEY,
+    location_id          INT,
+    player_id            INT,
+    position_id          INT,
+    teammate             BOOLEAN,
     FOREIGN KEY (location_id) REFERENCES location (location_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (position_id) REFERENCES position (position_id)
@@ -514,22 +517,22 @@ CREATE TABLE shot_type
 
 CREATE TABLE event_shot
 (
-    type_id      INT PRIMARY KEY,
-    key_pass_id  INT,
-    end_location_x DECIMAL(10, 2),
-    end_location_y DECIMAL(10, 2),
-    end_location_z DECIMAL(10, 2),
-    aerial_won   BOOLEAN,
+    type_id         INT PRIMARY KEY,
+    key_pass_id     INT,
+    end_location_x  DECIMAL(10, 2),
+    end_location_y  DECIMAL(10, 2),
+    end_location_z  DECIMAL(10, 2),
+    aerial_won      BOOLEAN,
     follows_dribble BOOLEAN,
-    first_time BOOLEAN,
+    first_time      BOOLEAN,
     freeze_frame_id INT,
-    open_goal BOOLEAN,
-    statsbomb_xg DECIMAL(10, 2),
-    deflected BOOLEAN,
-    technique_id INT,
-    body_part_id INT,
-    shot_type_id INT,
-    outcome_id INT,
+    open_goal       BOOLEAN,
+    statsbomb_xg    DECIMAL(10, 2),
+    deflected       BOOLEAN,
+    technique_id    INT,
+    body_part_id    INT,
+    shot_type_id    INT,
+    outcome_id      INT,
     FOREIGN KEY (key_pass_id) REFERENCES event_pass_type (type_id),
     FOREIGN KEY (freeze_frame_id) REFERENCES freeze_frame_type (freeze_frame_type_id),
     FOREIGN KEY (technique_id) REFERENCES technique_type (technique_type_id),
@@ -547,9 +550,9 @@ CREATE TABLE replacement_type
 
 CREATE TABLE event_substitution
 (
-    type_id INT PRIMARY KEY,
+    type_id             INT PRIMARY KEY,
     replacement_type_id INT,
-    outcome_id INT,
+    outcome_id          INT,
     FOREIGN KEY (replacement_type_id) REFERENCES replacement_type (replacement_type_id),
     FOREIGN KEY (outcome_id) REFERENCES outcome (outcome_id),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
