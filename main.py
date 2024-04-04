@@ -354,12 +354,14 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: []) -> None:
                 # possession, possession_team_id, duration
                 cursor.execute(
                     'INSERT INTO match_event (event_id, event_index, period, event_timestamp, minute, second, '
-                    'event_type_id, '
-                    'play_pattern_id, team_id, possession, possession_team_id, duration) '
-                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    'event_type_id, play_pattern_id, team_id, possession, possession_team_id, duration, '
+                    'under_pressure, off_camera, out )'
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                     (event['id'], event['index'], event['period'], event['timestamp'], event['minute'],
                      event['second'], event['type']['id'], event['play_pattern']['id'], event['team']['id'],
-                     event['possession'], event['possession_team']['id'], event.get('duration', None))
+                     event['possession'], event['possession_team']['id'], event.get('duration', None),
+                     event.get('under_pressure', None), event.get('off_camera', None), event.get('out', None)
+                     )
                 )
 
                 # if tactics field exists, there will be tactics object with
@@ -379,7 +381,38 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: []) -> None:
                 if 'tactics' in event:
                     pass
                 else:
-                    pass
+                    event_id = event['id']
+                    player_id = event.get('player', {}).get('id', None)
+                    position_id = event.get('position', {}).get('id', None)
+                    location = event.get('location', [None, None])
+                    location_x = location[0]
+                    location_y = location[1]
+                    related_events = event.get('related_events', None)
+
+                    if player_id is not None:
+                        cursor.execute('SELECT player_id FROM player WHERE player_id = %s', (player_id,))
+                        player = cursor.fetchone()
+                        if player is None:
+                            cursor.execute(
+                                'INSERT INTO player (player_id, player_name) VALUES (%s, %s)',
+                                (player_id, event.get('player', {}).get('name', None))
+                            )
+
+                    if position_id is not None:
+                        cursor.execute('SELECT position_id FROM position WHERE position_id = %s', (position_id,))
+                        position = cursor.fetchone()
+                        if position is None:
+                            cursor.execute(
+                                'INSERT INTO position (position_id, position_name) VALUES (%s, %s)',
+                                (position_id, event.get('position', {}).get('name', None))
+                            )
+
+                    cursor.execute(
+                        'UPDATE match_event '
+                        'SET player_id = %s, position_id = %s, location_x = %s, location_y = %s, related_events = %s '
+                        'WHERE event_id = %s',
+                        (player_id, position_id, location_x, location_y, related_events, event_id)
+                    )
 
 
 def create_tables(cursor: psycopg.cursor):

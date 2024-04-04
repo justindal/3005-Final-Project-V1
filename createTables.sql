@@ -178,6 +178,7 @@ CREATE TABLE match_event
     under_pressure     BOOLEAN,
     off_camera         BOOLEAN,
     out                BOOLEAN,
+    related_events     uuid[],
     FOREIGN KEY (event_type_id) REFERENCES event_type (type_id),
     FOREIGN KEY (team_id) REFERENCES team (team_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
