@@ -60,6 +60,7 @@ def get_relevant_data() -> []:
 
 # data from competitions.json
 def populate_from_competitions(cursor: psycopg.cursor) -> None:
+    print('populating from competitions.json')
     with open('open-data/data/competitions.json') as f:
         data = json.load(f)
         for competition in data:
@@ -85,15 +86,17 @@ def populate_from_competitions(cursor: psycopg.cursor) -> None:
                         competition['competition_youth'], competition['competition_international'],
                         competition['season_id'], competition['country_name'])
                 )
+    print('done')
 
 
 # data from matches folder
 def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []) -> None:
+    print('populating from matches folder')
     for file in match_file_paths:
         with open(file) as f:
             data = json.load(f)
             for match in data:
-                print(f'match: {match["match_id"]} and file: {file}')
+                # print(f'match: {match["match_id"]} and file: {file}')
                 # Check if 'referee' key exists in match
                 if 'referee' in match:
                     # check if referee exists
@@ -312,11 +315,13 @@ def populate_from_matches(cursor: psycopg.cursor, match_file_paths: []) -> None:
                         match['season']['season_id']
                     )
                 )
+    print('done')
 
 
 # populate from events folder TODO
 def populate_from_events(cursor: psycopg.cursor, event_file_paths: []) -> None:
     for file in event_file_paths:
+        print(f'populating from {file}')
         with open(file) as f:
             data = json.load(f)
             for event in data:
@@ -343,7 +348,37 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: []) -> None:
                     )
 
                 # load event data
+
+                # first load basic event data:
+                # id, index, period, timestamp, minute, second, type_id, play_pattern_id, team_id,
+                # possession, possession_team_id, duration
+                cursor.execute(
+                    'INSERT INTO match_event (event_id, event_index, period, event_timestamp, minute, second, '
+                    'event_type_id, '
+                    'play_pattern_id, team_id, possession, possession_team_id, duration) '
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    (event['id'], event['index'], event['period'], event['timestamp'], event['minute'],
+                     event['second'], event['type']['id'], event['play_pattern']['id'], event['team']['id'],
+                     event['possession'], event['possession_team']['id'], event.get('duration', None))
+                )
+
+                # if tactics field exists, there will be tactics object with
+                # int formation
+                # lineups: An array of objects, each representing a player in the starting lineup.
+                # Each object in the lineup:
+                # player: An object with id and name for the player
+                # position: An object with id and name for the player's position
+                # jersey_number: The player's jersey number
+
+                # if it doesn't exist, instead
+                # player: An object with id and name for the player
+                # position: An object with id and name for the player's position
+                # location: An object with x and y coordinates for the location of the event
+                # related_events: An array of objects, each representing an event that is related to the event.
+
                 if 'tactics' in event:
+                    pass
+                else:
                     pass
 
 
