@@ -10,7 +10,7 @@ def get_relevant_data() -> List:
     competition_ids = []
     season_ids = []
 
-    with open('open-data/data/competitions.json') as f:
+    with open('open-data/data/competitions.json', encoding='utf-8') as f:
         data = json.load(f)
         for competition in data:
             c1 = competition['competition_name'] == 'La Liga' and competition['season_name'] in ['2020/2021',
@@ -39,7 +39,7 @@ def get_relevant_data() -> List:
             'open-data/data/matches/' + str(competition_ids[i]) + '/' + str(season_ids[i]) + '.json')
 
     for file_path in match_file_paths:
-        with open(file_path) as f:
+        with open(file_path, encoding='utf-8') as f:
             data = json.load(f)
             for match in data:
                 for item in match:
@@ -61,7 +61,7 @@ def get_relevant_data() -> List:
 # data from competitions.json
 def populate_from_competitions(cursor: psycopg.cursor) -> None:
     print('populating from competitions.json')
-    with open('open-data/data/competitions.json') as f:
+    with open('open-data/data/competitions.json', encoding='utf-8') as f:
         data = json.load(f)
         for competition in data:
             c1 = competition['competition_name'] == 'La Liga' and competition['season_name'] in ['2020/2021',
@@ -93,7 +93,7 @@ def populate_from_competitions(cursor: psycopg.cursor) -> None:
 def populate_from_matches(cursor: psycopg.cursor, match_file_paths: List) -> None:
     print('populating from matches folder')
     for file in match_file_paths:
-        with open(file) as f:
+        with open(file, encoding='utf-8') as f:
             data = json.load(f)
             for match in data:
                 # print(f'match: {match["match_id"]} and file: {file}')
@@ -359,8 +359,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
     count = 0
     for file in event_file_paths:
         count += 1
-        print(f'populating from {file}. progress: {count}/{len(event_file_paths)}')
-        with open(file) as f:
+        print(f'progress: {count}/{len(event_file_paths)}')
+        with open(file, encoding='utf-8') as f:
             data = json.load(f)
             for event in data:
                 # print(f'current event: {event["id"]}')
@@ -490,6 +490,7 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
 
                 elif event_type_id == 16:
                     # shot
+                    player_id = event['player']['id']
                     # check if shot type exists
                     cursor.execute('SELECT shot_type_id FROM shot_type WHERE shot_type_id = %s',
                                    (event['shot']['type']['id'],))
@@ -590,12 +591,13 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                     cursor.execute(
                         'INSERT INTO event_shot (event_id, type_id, outcome_id, technique_id, body_part_id, '
                         'freeze_frame_id, key_pass_id, end_location_x, end_location_y, end_location_z, aerial_won, '
-                        'follows_dribble, first_time, open_goal, statsbomb_xg, deflected)'
-                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                        'follows_dribble, first_time, open_goal, statsbomb_xg, deflected, player_id)'
+                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                         (event['id'], event['type']['id'], event['shot']['outcome']['id'],
                          event['shot']['technique']['id'],
                          event['shot']['body_part']['id'], freeze_frame_id, key_pass_id, end_location_x, end_location_y,
-                         end_location_z, aerial_won, follows_dribble, first_time, open_goal, statsbomb_xg, deflected)
+                         end_location_z, aerial_won, follows_dribble, first_time, open_goal, statsbomb_xg, deflected,
+                         player_id)
                     )
 
                 elif event_type_id == 17:
@@ -873,7 +875,7 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                             )
                         # do the same for pass_body_part
                         cursor.execute('SELECT body_part_id FROM pass_body_part WHERE body_part_id = %s',
-                                        (event['pass']['body_part']['id'],))
+                                       (event['pass']['body_part']['id'],))
                         pass_body_part = cursor.fetchone()
                         if pass_body_part is None:
                             cursor.execute(
@@ -1107,6 +1109,113 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                         (player_id, position_id, location_x, location_y, related_events, event_id)
                     )
 
+    print('done populating from events')
+
+
+def populate_from_lineups(cursor: psycopg.cursor, lineup_file_paths: List[str]) -> None:
+    for file in lineup_file_paths:
+        with open(file, encoding='utf-8') as f:
+            print(f'Populating from {file}')
+            data = json.load(f)
+            for lineup in data:
+                match_id = file.split('/')[-1].split('.')[0]
+                for player in lineup['lineup']:
+                    player_id = player['player_id']
+                    player_name = player['player_name']
+                    player_nickname = player.get('player_nickname', None)
+                    jersey_number = player.get('jersey_number', None)
+                    player_country = player.get('country', {}).get('id', None)
+
+                    # check if player country exists
+                    cursor.execute('SELECT country_id FROM countries WHERE country_id = %s', (player_country,))
+                    country = cursor.fetchone()
+                    if country is None:
+                        # add country to database
+                        cursor.execute(
+                            'INSERT INTO countries (country_id) VALUES (%s)',
+                            (player_country,)
+                        )
+
+
+                    # position data
+                    positions = player.get('positions', [])
+                    player_position_data = positions[0] if positions else {}
+                    player_position = player_position_data.get('position', None)
+                    position_id = player_position_data.get('position_id', None)
+                    from_time = player_position_data.get('from', None)
+                    to_time = player_position_data.get('to', None)
+                    from_period = player_position_data.get('from_period', None)
+                    start_reason = player_position_data.get('start_reason', None)
+                    end_reason = player_position_data.get('end_reason', None)
+
+                    # card data
+                    try:
+                        player_card_data = player.get('cards', [{}])[0]
+                    except IndexError:
+                        player_card_data = None
+                        card_name = None
+
+                    if player_card_data is not None:
+                        card_time = player_card_data.get('time', None)
+                        card_name = player_card_data.get('card', {}).get('type', None)
+                        card_reason = player_card_data.get('reason', None)
+                        card_period = player_card_data.get('period', None)
+
+                    # insert player if not exists
+                    cursor.execute('SELECT player_id FROM player WHERE player_id = %s', (player_id,))
+                    player_exists = cursor.fetchone()
+                    if player_exists is None:
+                        cursor.execute(
+                            'INSERT INTO player (player_id, player_name, player_nickname, jersey_number, country_id, '
+                            'cards, positions) '
+                            'VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                            (player_id, player_name, player_nickname, jersey_number, player_country, card_name,
+                             position_id)
+                        )
+                    else:
+                        cursor.execute(
+                            'UPDATE player '
+                            'SET player_name = %s, player_nickname = %s, jersey_number = %s, country_id = %s, '
+                            'cards = %s, positions = %s '
+                            'WHERE player_id = %s',
+                            (player_name, player_nickname, jersey_number, player_country, card_name, position_id, player_id)
+                        )
+
+                    if positions:
+                        # insert into position table
+                        cursor.execute('SELECT position_id FROM position WHERE position_id = %s', (position_id,))
+                        position_exists = cursor.fetchone()
+                        if position_exists is None:
+                            cursor.execute(
+                                'INSERT INTO position (position_id, position_name) VALUES (%s, %s)',
+                                (position_id, player_position)
+                            )
+
+                        # insert into player_position table
+                        cursor.execute(
+                            'INSERT INTO player_position (player_id, position_id, from_time, to_time, from_period, '
+                            'start_reason, end_reason)'
+                            'VALUES (%s, %s, %s, %s, %s, %s, %s) '
+                            'ON CONFLICT (player_id, position_id) DO UPDATE SET '
+                            'from_time = EXCLUDED.from_time, to_time = EXCLUDED.to_time, from_period = '
+                            'EXCLUDED.from_period,'
+                            'start_reason = EXCLUDED.start_reason, end_reason = EXCLUDED.end_reason',
+                            (player_id, position_id, from_time, to_time, from_period, start_reason, end_reason)
+                        )
+
+                    cursor.execute(
+                        'INSERT INTO lineup_player (player_id, position_id, match_id) '
+                        'VALUES (%s, %s, %s)',
+                        (player_id, position_id, match_id)
+                    )
+
+                    cursor.execute(
+                        'INSERT INTO lineup (team_id, match_id, player_id) '
+                        'VALUES (%s, %s, %s)',
+                        (lineup['team_id'], match_id, player_id)
+                    )
+
+
 
 def create_tables(cursor: psycopg.cursor):
     # get file named createTables.sql
@@ -1125,7 +1234,9 @@ def drop_tables(cursor: psycopg.cursor):
 def main():
     connection = psycopg.connect(
         host='localhost',
-        dbname='PROJECT'
+        dbname='PROJECT',
+        user='postgres',
+        password='postgres'
     )
     cursor = connection.cursor()
 
@@ -1137,6 +1248,7 @@ def main():
     populate_from_competitions(cursor)
     populate_from_matches(cursor, data[3])
     populate_from_events(cursor, data[4])
+    populate_from_lineups(cursor, data[5])
 
     connection.commit()
     cursor.close()

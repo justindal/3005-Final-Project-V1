@@ -126,12 +126,12 @@ CREATE TABLE player_position
 (
     player_id    INT,
     position_id  INT,
-    from_time    TIME,
-    to_time      TIME,
-    from_period  VARCHAR(50),
-    to_period    VARCHAR(50),
-    start_reason VARCHAR(255),
-    end_reason   VARCHAR(255),
+    from_time    varchar(10),
+    to_time      varchar(10),
+    from_period  INT,
+    to_period    INT,
+    start_reason VARCHAR(50),
+    end_reason   VARCHAR(50),
     PRIMARY KEY (player_id, position_id),
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (position_id) REFERENCES position (position_id)
@@ -140,25 +140,25 @@ CREATE TABLE player_position
 CREATE TABLE event_type
 (
     type_id   INT PRIMARY KEY,
-    type_name VARCHAR(255)
+    type_name VARCHAR(50)
 );
 
 CREATE TABLE pass_height
 (
-    height_id   INT PRIMARY KEY ,
-    height_name VARCHAR(255)
+    height_id   INT PRIMARY KEY,
+    height_name VARCHAR(50)
 );
 
 CREATE TABLE pass_body_part
 (
     body_part_id   INT PRIMARY KEY,
-    body_part_name VARCHAR(255)
+    body_part_name VARCHAR(50)
 );
 
 CREATE TABLE pass_type
 (
     pass_type_id INT PRIMARY KEY,
-    pass_name    VARCHAR(255)
+    pass_name    VARCHAR(50)
 );
 
 CREATE TABLE match_event
@@ -166,7 +166,7 @@ CREATE TABLE match_event
     event_id           uuid PRIMARY KEY,
     event_index        INT,
     period             INT,
-    event_timestamp    varchar(255),
+    event_timestamp    varchar(50),
     minute             INT,
     second             INT,
     possession         INT,
@@ -235,12 +235,9 @@ CREATE TABLE tactics
 
 CREATE TABLE lineup_player
 (
-    event_id      uuid,
     player_id     INT,
     position_id   INT,
-    jersey_number INT,
-    PRIMARY KEY (event_id, player_id),
-    FOREIGN KEY (event_id) REFERENCES tactics (event_id),
+    match_id      INT,
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (position_id) REFERENCES position (position_id)
 );
@@ -254,7 +251,7 @@ CREATE TABLE outcome
 CREATE TABLE card
 (
     card_id   INT PRIMARY KEY,
-    card_name VARCHAR(255)
+    card_name VARCHAR(25)
 );
 
 CREATE TABLE event_5050
@@ -522,9 +519,9 @@ CREATE TABLE event_pressure
 
 CREATE TABLE location
 (
-    player_id   INT,
-    x           DECIMAL(10, 2),
-    y           DECIMAL(10, 2)
+    player_id INT,
+    x         DECIMAL(10, 2),
+    y         DECIMAL(10, 2)
 );
 
 CREATE TABLE freeze_frame_type
@@ -558,12 +555,14 @@ CREATE TABLE event_shot
     first_time      BOOLEAN,
     freeze_frame_id uuid,
     open_goal       BOOLEAN,
-    statsbomb_xg    DECIMAL(10, 2),
+    statsbomb_xg    DECIMAL(10, 3),
     deflected       BOOLEAN,
     technique_id    INT,
     body_part_id    INT,
     shot_type_id    INT,
     outcome_id      INT,
+    player_id       INT,
+    FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (technique_id) REFERENCES technique_type (technique_type_id),
     FOREIGN KEY (body_part_id) REFERENCES body_part (body_part_id),
     FOREIGN KEY (shot_type_id) REFERENCES shot_type (shot_type_id),
