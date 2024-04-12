@@ -985,7 +985,7 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                     # half end
                     cursor.execute(
                         'INSERT INTO event_half_end (event_id, type_id, early_video_end, match_suspended)'
-                        'VALUES (%s, %s, %s)',
+                        'VALUES (%s, %s, %s, %s)',
                         (event['id'], event['type']['id'], event.get('early_video_end', None),
                          event.get('match_suspended', None))
                     )
@@ -1003,7 +1003,7 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                     cursor.execute(
                         'INSERT INTO event_dribbled_past (event_id, type_id, counterpress)'
                         'VALUES (%s, %s, %s)',
-                        (event['id'], event['type']['id'], event.get('counterpress', {}).get('id', None))
+                        (event['id'], event['type']['id'], event.get('counterpress', None))
                     )
 
                 elif event_type_id == 40:
