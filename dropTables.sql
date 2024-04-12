@@ -1,56 +1,114 @@
-DROP TABLE IF EXISTS event_substitution;
-DROP TABLE IF EXISTS replacement_type;
-DROP TABLE IF EXISTS event_shot;
-DROP TABLE IF EXISTS shot_type;
-DROP TABLE IF EXISTS freeze_frame_type;
-DROP TABLE IF EXISTS location;
-DROP TABLE IF EXISTS event_pressure;
-DROP TABLE IF EXISTS event_player_off;
-DROP TABLE IF EXISTS event_pass_type;
-DROP TABLE IF EXISTS recipient_type;
-DROP TABLE IF EXISTS event_miscontrol;
-DROP TABLE IF EXISTS event_interception;
-DROP TABLE IF EXISTS event_injury_stoppage;
-DROP TABLE IF EXISTS event_half_start;
-DROP TABLE IF EXISTS event_half_end;
-DROP TABLE IF EXISTS event_goalkeeper;
-DROP TABLE IF EXISTS goalkeeper_event_type;
-DROP TABLE IF EXISTS technique_type;
-DROP TABLE IF EXISTS event_foul_won;
-DROP TABLE IF EXISTS event_foul_committed;
-DROP TABLE IF EXISTS foul_type;
-DROP TABLE IF EXISTS event_duel;
-DROP TABLE IF EXISTS duel_type;
-DROP TABLE IF EXISTS event_dribbled_past;
-DROP TABLE IF EXISTS event_dribble;
-DROP TABLE IF EXISTS event_clearance;
-DROP TABLE IF EXISTS event_carry;
-DROP TABLE IF EXISTS event_block;
-DROP TABLE IF EXISTS event_ball_recovery;
-DROP TABLE IF EXISTS event_ball_receipt;
-DROP TABLE IF EXISTS event_bad_behaviour;
-DROP TABLE IF EXISTS event_5050;
-DROP TABLE IF EXISTS card;
-DROP TABLE IF EXISTS outcome;
-DROP TABLE IF EXISTS lineup_player;
-DROP TABLE IF EXISTS tactics;
-DROP TABLE IF EXISTS lineup;
-DROP TABLE IF EXISTS pass;
-DROP TABLE IF EXISTS match_event;
-DROP TABLE IF EXISTS pass_type;
-DROP TABLE IF EXISTS pass_body_part;
-DROP TABLE IF EXISTS pass_height;
-DROP TABLE IF EXISTS event_type;
-DROP TABLE IF EXISTS player_position;
-DROP TABLE IF EXISTS play_pattern;
-DROP TABLE IF EXISTS position;
-DROP TABLE IF EXISTS player;
-DROP TABLE IF EXISTS match;
-DROP TABLE IF EXISTS competition_stage;
-DROP TABLE IF EXISTS stadium;
-DROP TABLE IF EXISTS referee;
-DROP TABLE IF EXISTS manager;
-DROP TABLE IF EXISTS team;
-DROP TABLE IF EXISTS competition;
-DROP TABLE IF EXISTS season;
-DROP TABLE IF EXISTS countries;
+drop table if exists body_part cascade;
+
+drop table if exists competition cascade;
+
+drop table if exists player_position cascade;
+
+drop table if exists pass cascade;
+
+drop table if exists lineup cascade;
+
+drop table if exists lineup_player cascade;
+
+drop table if exists tactics cascade;
+
+drop table if exists event_5050 cascade;
+
+drop table if exists event_bad_behaviour cascade;
+
+drop table if exists event_ball_receipt cascade;
+
+drop table if exists match_event cascade;
+
+drop table if exists match cascade;
+
+drop table if exists season cascade;
+
+drop table if exists team cascade;
+
+drop table if exists manager cascade;
+
+drop table if exists referee cascade;
+
+drop table if exists stadium cascade;
+
+drop table if exists competition_stage cascade;
+
+drop table if exists play_pattern cascade;
+
+drop table if exists event_ball_recovery cascade;
+
+drop table if exists event_block cascade;
+
+drop table if exists event_carry cascade;
+
+drop table if exists event_clearance cascade;
+
+drop table if exists event_dribble cascade;
+
+drop table if exists event_dribbled_past cascade;
+
+drop table if exists event_duel cascade;
+
+drop table if exists duel_type cascade;
+
+drop table if exists event_foul_committed cascade;
+
+drop table if exists card cascade;
+
+drop table if exists foul_type cascade;
+
+drop table if exists event_foul_won cascade;
+
+drop table if exists event_goalkeeper cascade;
+
+drop table if exists goalkeeper_event_type cascade;
+
+drop table if exists event_half_end cascade;
+
+drop table if exists event_half_start cascade;
+
+drop table if exists event_injury_stoppage cascade;
+
+drop table if exists event_interception cascade;
+
+drop table if exists event_miscontrol cascade;
+
+drop table if exists event_pass_type cascade;
+
+drop table if exists pass_height cascade;
+
+drop table if exists pass_type cascade;
+
+drop table if exists recipient_type cascade;
+
+drop table if exists event_player_off cascade;
+
+drop table if exists event_pressure cascade;
+
+drop table if exists event_shot cascade;
+
+drop table if exists pass_body_part cascade;
+
+drop table if exists technique_type cascade;
+
+drop table if exists freeze_frame_type cascade;
+
+drop table if exists player cascade;
+
+drop table if exists countries cascade;
+
+drop table if exists position cascade;
+
+drop table if exists location cascade;
+
+drop table if exists shot_type cascade;
+
+drop table if exists event_substitution cascade;
+
+drop table if exists event_type cascade;
+
+drop table if exists outcome cascade;
+
+drop table if exists replacement_type cascade;
+

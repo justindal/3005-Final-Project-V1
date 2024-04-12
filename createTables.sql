@@ -4,6 +4,12 @@ CREATE TABLE countries
     country_name VARCHAR(255)
 );
 
+CREATE TABLE body_part
+(
+    body_part_id   INT PRIMARY KEY,
+    body_part_name VARCHAR(255)
+);
+
 CREATE TABLE season
 (
     season_id      INT PRIMARY KEY,
@@ -139,7 +145,7 @@ CREATE TABLE event_type
 
 CREATE TABLE pass_height
 (
-    height_id   INT PRIMARY KEY,
+    height_id   INT PRIMARY KEY ,
     height_name VARCHAR(255)
 );
 
@@ -211,7 +217,7 @@ CREATE TABLE pass
 
 CREATE TABLE lineup
 (
-    team_id   INT PRIMARY KEY,
+    team_id   INT,
     match_id  INT,
     player_id INT,
     FOREIGN KEY (team_id) REFERENCES team (team_id),
@@ -253,7 +259,8 @@ CREATE TABLE card
 
 CREATE TABLE event_5050
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     outcome_id   INT,
     counterpress BOOLEAN,
     FOREIGN KEY (outcome_id) REFERENCES outcome (outcome_id),
@@ -262,23 +269,27 @@ CREATE TABLE event_5050
 
 CREATE TABLE event_bad_behaviour
 (
-    type_id INT PRIMARY KEY,
-    card_id INT,
+    event_id uuid,
+    type_id  INT,
+    card_id  INT,
     FOREIGN KEY (card_id) REFERENCES card (card_id),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_ball_receipt
 (
-    type_id    INT PRIMARY KEY,
+    event_id   uuid,
+    type_id    INT,
     outcome_id INT,
     FOREIGN KEY (outcome_id) REFERENCES outcome (outcome_id),
-    FOREIGN KEY (type_id) REFERENCES event_type (type_id)
+    FOREIGN KEY (type_id) REFERENCES event_type (type_id),
+    FOREIGN KEY (event_id) REFERENCES match_event (event_id)
 );
 
 CREATE TABLE event_ball_recovery
 (
-    type_id          INT PRIMARY KEY,
+    type_id          INT,
+    event_id         uuid,
     offensive        BOOLEAN,
     recovery_failure BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
@@ -286,7 +297,8 @@ CREATE TABLE event_ball_recovery
 
 CREATE TABLE event_block
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     offensive    BOOLEAN,
     deflection   BOOLEAN,
     save_block   BOOLEAN,
@@ -296,7 +308,8 @@ CREATE TABLE event_block
 
 CREATE TABLE event_carry
 (
-    type_id        INT PRIMARY KEY,
+    type_id        INT,
+    event_id       uuid,
     end_location_x DECIMAL(10, 2),
     end_location_y DECIMAL(10, 2),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
@@ -304,7 +317,8 @@ CREATE TABLE event_carry
 
 CREATE TABLE event_clearance
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     aerial_won   BOOLEAN,
     body_part_id INT,
     FOREIGN KEY (body_part_id) REFERENCES pass_body_part (body_part_id),
@@ -313,7 +327,8 @@ CREATE TABLE event_clearance
 
 CREATE TABLE event_dribble
 (
-    type_id    INT PRIMARY KEY,
+    type_id    INT,
+    event_id   uuid,
     outcome_id INT,
     overrun    BOOLEAN,
     nutmeg     BOOLEAN,
@@ -324,7 +339,8 @@ CREATE TABLE event_dribble
 
 CREATE TABLE event_dribbled_past
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     counterpress BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
@@ -332,12 +348,14 @@ CREATE TABLE event_dribbled_past
 CREATE TABLE duel_type
 (
     duel_type_id   INT PRIMARY KEY,
+    event_id       uuid,
     duel_type_name VARCHAR(255)
 );
 
 CREATE TABLE event_duel
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     outcome_id   INT,
     duel_type_id INT,
     counterpress BOOLEAN,
@@ -354,7 +372,8 @@ CREATE TABLE foul_type
 
 CREATE TABLE event_foul_committed
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
+    event_id     uuid,
     card_id      INT,
     counterpress BOOLEAN,
     offensive    BOOLEAN,
@@ -368,7 +387,8 @@ CREATE TABLE event_foul_committed
 
 CREATE TABLE event_foul_won
 (
-    type_id   INT PRIMARY KEY,
+    type_id   INT,
+    event_id  uuid,
     defensive BOOLEAN,
     advantage BOOLEAN,
     penalty   BOOLEAN,
@@ -389,7 +409,8 @@ CREATE TABLE goalkeeper_event_type
 
 CREATE TABLE event_goalkeeper
 (
-    type_id                  INT PRIMARY KEY,
+    type_id                  INT,
+    event_id                 uuid,
     position_id              INT,
     technique_id             INT,
     body_part_id             INT,
@@ -405,7 +426,8 @@ CREATE TABLE event_goalkeeper
 
 CREATE TABLE event_half_end
 (
-    type_id         INT PRIMARY KEY,
+    type_id         INT,
+    event_id        uuid,
     early_video_end BOOLEAN,
     match_suspended BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
@@ -413,21 +435,24 @@ CREATE TABLE event_half_end
 
 CREATE TABLE event_half_start
 (
-    type_id          INT PRIMARY KEY,
+    type_id          INT,
+    event_id         uuid,
     late_video_start BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_injury_stoppage
 (
-    type_id  INT PRIMARY KEY,
+    type_id  INT,
+    event_id uuid,
     in_chain BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_interception
 (
-    type_id    INT PRIMARY KEY,
+    type_id    INT,
+    event_id   uuid,
     outcome_id INT,
     FOREIGN KEY (outcome_id) references outcome (outcome_id),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
@@ -435,7 +460,8 @@ CREATE TABLE event_interception
 
 CREATE TABLE event_miscontrol
 (
-    type_id    INT PRIMARY KEY,
+    type_id    INT,
+    event_id   uuid,
     aerial_won BOOLEAN,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
@@ -448,7 +474,8 @@ CREATE TABLE recipient_type
 
 CREATE TABLE event_pass_type
 (
-    type_id           INT PRIMARY KEY,
+    type_id           INT,
+    event_id          uuid,
     recipient_type_id INT,
     length            DECIMAL(10, 2),
     angle             DECIMAL(10, 2),
@@ -479,33 +506,35 @@ CREATE TABLE event_pass_type
 
 CREATE TABLE event_player_off
 (
-    type_id   INT PRIMARY KEY,
+    type_id   INT,
     permanent BOOLEAN,
+    event_id  uuid,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE event_pressure
 (
-    type_id      INT PRIMARY KEY,
+    type_id      INT,
     counterpress BOOLEAN,
+    event_id     uuid,
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
 );
 
 CREATE TABLE location
 (
-    location_id INT PRIMARY KEY,
+    player_id   INT,
     x           DECIMAL(10, 2),
     y           DECIMAL(10, 2)
 );
 
 CREATE TABLE freeze_frame_type
 (
-    freeze_frame_type_id INT PRIMARY KEY,
-    location_id          INT,
-    player_id            INT,
-    position_id          INT,
-    teammate             BOOLEAN,
-    FOREIGN KEY (location_id) REFERENCES location (location_id),
+    freeze_frame_id uuid,
+    location_id     INT,
+    player_id       INT,
+    position_id     INT,
+    event_id        uuid,
+    teammate        BOOLEAN,
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (position_id) REFERENCES position (position_id)
 );
@@ -518,15 +547,16 @@ CREATE TABLE shot_type
 
 CREATE TABLE event_shot
 (
-    type_id         INT PRIMARY KEY,
-    key_pass_id     INT,
+    type_id         INT,
+    event_id        uuid,
+    key_pass_id     uuid,
     end_location_x  DECIMAL(10, 2),
     end_location_y  DECIMAL(10, 2),
     end_location_z  DECIMAL(10, 2),
     aerial_won      BOOLEAN,
     follows_dribble BOOLEAN,
     first_time      BOOLEAN,
-    freeze_frame_id INT,
+    freeze_frame_id uuid,
     open_goal       BOOLEAN,
     statsbomb_xg    DECIMAL(10, 2),
     deflected       BOOLEAN,
@@ -534,10 +564,8 @@ CREATE TABLE event_shot
     body_part_id    INT,
     shot_type_id    INT,
     outcome_id      INT,
-    FOREIGN KEY (key_pass_id) REFERENCES event_pass_type (type_id),
-    FOREIGN KEY (freeze_frame_id) REFERENCES freeze_frame_type (freeze_frame_type_id),
     FOREIGN KEY (technique_id) REFERENCES technique_type (technique_type_id),
-    FOREIGN KEY (body_part_id) REFERENCES pass_body_part (body_part_id),
+    FOREIGN KEY (body_part_id) REFERENCES body_part (body_part_id),
     FOREIGN KEY (shot_type_id) REFERENCES shot_type (shot_type_id),
     FOREIGN KEY (outcome_id) REFERENCES outcome (outcome_id),
     FOREIGN KEY (type_id) REFERENCES event_type (type_id)
@@ -551,7 +579,8 @@ CREATE TABLE replacement_type
 
 CREATE TABLE event_substitution
 (
-    type_id             INT PRIMARY KEY,
+    type_id             INT,
+    event_id            uuid,
     replacement_type_id INT,
     outcome_id          INT,
     FOREIGN KEY (replacement_type_id) REFERENCES replacement_type (replacement_type_id),
