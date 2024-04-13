@@ -35,10 +35,10 @@ sudo -u postgres psql
 \password postgres
 
 '''
-root_database_name = "PROJECT"
+root_database_name = "project_database"
 query_database_name = "query_database"
 db_username = 'postgres'
-db_password = 'postgres'
+db_password = '1234'
 db_host = 'localhost'
 db_port = '5432'
 
