@@ -208,7 +208,7 @@ def Q_2(cursor, conn, execution_time):
     # Enter QUERY within the quotes:
 
     query = """SELECT p.player_name,
-       COUNT(s.event_id) as number_of_shots
+       COUNT(DISTINCT s.event_id) as number_of_shots
 FROM event_shot s
 JOIN player p ON s.player_id = p.player_id
 JOIN match m ON s.match_id = m.match_id
@@ -237,7 +237,26 @@ def Q_3(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """SELECT
+    p.player_name,
+    COUNT(es.event_id) AS first_time_shots
+FROM
+    player p
+JOIN
+    event_shot es ON p.player_id = es.player_id
+JOIN
+    match m ON es.match_id = m.match_id
+JOIN
+    season s ON m.season_id = s.season_id
+WHERE
+    es.first_time = TRUE AND
+    s.season_name IN ('2020/2021', '2019/2020', '2018/2019')
+GROUP BY
+    p.player_name
+HAVING
+    COUNT(es.event_id) > 0
+ORDER BY
+    first_time_shots DESC; """
 
     # ==========================================================================
 
@@ -256,7 +275,29 @@ def Q_4(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """SELECT
+    t.team_name,
+    COUNT(p.pass_id) AS number_of_passes
+FROM
+    team t
+JOIN
+    match m ON t.team_id = m.home_team_id OR t.team_id = m.away_team_id
+JOIN
+    season s ON m.season_id = s.season_id
+JOIN
+    competition c ON s.competition_id = c.competition_id AND c.competition_name = 'La Liga'
+JOIN
+    match_event me ON m.match_id = me.match_id AND (me.team_id = m.home_team_id OR me.team_id = m.away_team_id)
+LEFT JOIN
+    pass p ON me.event_id = p.event_id
+WHERE
+    s.season_name = '2020/2021' AND me.event_type_id = (SELECT type_id FROM event_type WHERE type_name = 'Pass')
+GROUP BY
+    t.team_name
+HAVING
+    COUNT(p.pass_id) > 0
+ORDER BY
+    number_of_passes DESC; """
 
     # ==========================================================================
 

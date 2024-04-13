@@ -359,7 +359,6 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
     count = 0
     for file in event_file_paths:
         match_id = file.split('/')[3].split('.')[0]
-        print(match_id)
         count += 1
         print(f'progress: {count}/{len(event_file_paths)}')
         with open(file, encoding='utf-8') as f:
@@ -396,12 +395,12 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                 cursor.execute(
                     'INSERT INTO match_event (event_id, event_index, period, event_timestamp, minute, second, '
                     'event_type_id, play_pattern_id, team_id, possession, possession_team_id, duration, '
-                    'under_pressure, off_camera, out )'
-                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    'under_pressure, off_camera, out, match_id )'
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                     (event['id'], event['index'], event['period'], event['timestamp'], event['minute'],
                      event['second'], event['type']['id'], event['play_pattern']['id'], event['team']['id'],
                      event['possession'], event['possession_team']['id'], event.get('duration', None),
-                     event.get('under_pressure', None), event.get('off_camera', None), event.get('out', None)
+                     event.get('under_pressure', None), event.get('off_camera', None), event.get('out', None), match_id
                      )
                 )
 
