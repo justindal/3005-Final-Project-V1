@@ -359,31 +359,33 @@ def Q_6(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ SELECT
+    query = """ 
+    SELECT
     t.team_name,
     COUNT(DISTINCT es.event_id) AS number_of_shots
-FROM
+    FROM
     team t
-JOIN
+    JOIN
     match m ON (t.team_id = m.home_team_id OR t.team_id = m.away_team_id)
-JOIN
+    JOIN
     match_event me ON m.match_id = me.match_id
-JOIN
+    JOIN
     event_shot es ON me.event_id = es.event_id
-JOIN
+    JOIN
     season s ON m.season_id = s.season_id
-JOIN
+    JOIN
     competition c ON s.competition_id = c.competition_id
-WHERE
+    WHERE
     c.competition_name = 'Premier League'
     AND s.season_name = '2003/2004'
     AND me.event_type_id = (SELECT type_id FROM event_type WHERE type_name = 'Shot')
-GROUP BY
+    GROUP BY
     t.team_name
-HAVING
+    HAVING
     COUNT(es.event_id) > 0
-ORDER BY
-    number_of_shots DESC; """
+    ORDER BY
+    number_of_shots DESC;
+    """
 
     # ==========================================================================
 
@@ -402,7 +404,35 @@ def Q_7(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """
+    SELECT
+    pl.player_name,
+    COUNT(DISTINCT me.event_id) AS number_of_through_balls
+    FROM
+    player pl
+    JOIN
+    match_event me ON pl.player_id = me.player_id
+    JOIN
+    event_pass_type ept ON me.event_id = ept.event_id
+    JOIN
+    technique_type tt ON ept.technique_id = tt.technique_type_id
+    JOIN
+    match m ON me.match_id = m.match_id
+    JOIN
+    season s ON m.season_id = s.season_id
+    JOIN
+    competition c ON s.competition_id = c.competition_id
+    WHERE
+    c.competition_name = 'La Liga'
+    AND s.season_name = '2020/2021'
+    AND tt.technique_type_name = 'Through Ball'
+    GROUP BY
+    pl.player_name
+    HAVING
+    COUNT(me.event_id) > 0
+    ORDER BY
+    number_of_through_balls DESC;
+     """
 
     # ==========================================================================
 
@@ -421,7 +451,35 @@ def Q_8(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """
+    SELECT
+    t.team_name,
+    COUNT(DISTINCT me.event_id) AS number_of_through_balls
+    FROM
+    team t
+    JOIN
+    match m ON (t.team_id = m.home_team_id OR t.team_id = m.away_team_id)
+    JOIN
+    match_event me ON m.match_id = me.match_id
+    JOIN
+    event_pass_type ept ON me.event_id = ept.event_id
+    JOIN
+    technique_type tt ON ept.technique_id = tt.technique_type_id
+    JOIN
+    season s ON m.season_id = s.season_id
+    JOIN
+    competition c ON s.competition_id = c.competition_id
+    WHERE
+    c.competition_name = 'La Liga'
+    AND s.season_name = '2020/2021'
+    AND tt.technique_type_name = 'Through Ball'
+    GROUP BY
+    t.team_name
+    HAVING
+    COUNT(me.event_id) > 0
+    ORDER BY
+    number_of_through_balls DESC;
+     """
 
     # ==========================================================================
 
