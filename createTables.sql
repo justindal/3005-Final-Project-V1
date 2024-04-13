@@ -101,12 +101,13 @@ CREATE TABLE match
 CREATE TABLE player
 (
     player_id       INT PRIMARY KEY,
-    player_name     VARCHAR(255),
-    player_nickname VARCHAR(255),
+    player_name     VARCHAR(50),
+    player_nickname VARCHAR(50),
     jersey_number   INT,
-    cards           VARCHAR(255),
-    positions       VARCHAR(255),
+    cards           VARCHAR(50),
+    positions       VARCHAR(50),
     country_id      INT,
+    match_id        INT,
     FOREIGN KEY (country_id) REFERENCES countries (country_id)
 );
 
@@ -562,6 +563,7 @@ CREATE TABLE event_shot
     shot_type_id    INT,
     outcome_id      INT,
     player_id       INT,
+    match_id        INT,
     FOREIGN KEY (player_id) REFERENCES player (player_id),
     FOREIGN KEY (technique_id) REFERENCES technique_type (technique_type_id),
     FOREIGN KEY (body_part_id) REFERENCES body_part (body_part_id),

@@ -358,6 +358,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
 
     count = 0
     for file in event_file_paths:
+        match_id = file.split('/')[3].split('.')[0]
+        print(match_id)
         count += 1
         print(f'progress: {count}/{len(event_file_paths)}')
         with open(file, encoding='utf-8') as f:
@@ -547,8 +549,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                             if player is None:
                                 # add player to database
                                 cursor.execute(
-                                    'INSERT INTO player (player_id, player_name) VALUES (%s, %s)',
-                                    (i['player']['id'], i['player']['name'])
+                                    'INSERT INTO player (player_id, player_name, match_id) VALUES (%s, %s, %s)',
+                                    (i['player']['id'], i['player']['name'], match_id)
                                 )
 
                             # check if shot freeze frame position exists
@@ -591,13 +593,13 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                     cursor.execute(
                         'INSERT INTO event_shot (event_id, type_id, outcome_id, technique_id, body_part_id, '
                         'freeze_frame_id, key_pass_id, end_location_x, end_location_y, end_location_z, aerial_won, '
-                        'follows_dribble, first_time, open_goal, statsbomb_xg, deflected, player_id)'
-                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                        'follows_dribble, first_time, open_goal, statsbomb_xg, deflected, player_id, match_id)'
+                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                         (event['id'], event['type']['id'], event['shot']['outcome']['id'],
                          event['shot']['technique']['id'],
                          event['shot']['body_part']['id'], freeze_frame_id, key_pass_id, end_location_x, end_location_y,
                          end_location_z, aerial_won, follows_dribble, first_time, open_goal, statsbomb_xg, deflected,
-                         player_id)
+                         player_id, match_id)
                     )
 
                 elif event_type_id == 17:
@@ -636,8 +638,9 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                     if player is None:
                         # add player to database
                         cursor.execute(
-                            'INSERT INTO player (player_id, player_name) VALUES (%s, %s)',
-                            (event['substitution']['replacement']['id'], event['substitution']['replacement']['name'])
+                            'INSERT INTO player (player_id, player_name, match_id) VALUES (%s, %s, %s)',
+                            (event['substitution']['replacement']['id'], event['substitution']['replacement']['name'],
+                             match_id)
                         )
 
                     # insert into replacement_type table
@@ -939,8 +942,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                         player = cursor.fetchone()
                         if player is None:
                             cursor.execute(
-                                'INSERT INTO player (player_id, player_name) VALUES (%s, %s)',
-                                (event['pass']['recipient']['id'], event['pass']['recipient']['name'])
+                                'INSERT INTO player (player_id, player_name, match_id) VALUES (%s, %s, %s)',
+                                (event['pass']['recipient']['id'], event['pass']['recipient']['name'], match_id)
                             )
 
                         # do the same for recipient type
@@ -1025,21 +1028,6 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                          event.get('end_location', [None, None])[0], event.get('end_location', [None, None])[1])
                     )
 
-                # todo if tactics field exists
-                # there will be tactics object with
-                # int formation
-                # lineups: An array of objects, each representing a player in the starting lineup.
-                # Each object in the lineup:
-                # player: An object with id and name for the player
-                # position: An object with id and name for the player's position
-                # jersey_number: The player's jersey number
-
-                # if it doesn't exist, instead
-                # player: An object with id and name for the player
-                # position: An object with id and name for the player's position
-                # location: An object with x and y coordinates for the location of the event
-                # related_events: An array of objects, each representing an event that is related to the event.
-
                 if 'tactics' in event:
                     tactics = event['tactics']
                     formation = tactics.get('formation', None)
@@ -1057,8 +1045,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                         player = cursor.fetchone()
                         if player is None:
                             cursor.execute(
-                                'INSERT INTO player (player_id, player_name, jersey_number) VALUES (%s, %s, %s)',
-                                (player_id, lineup['player']['name'], jersey_number)
+                                'INSERT INTO player (player_id, player_name, jersey_number, match_id) VALUES (%s, %s, %s, %s)',
+                                (player_id, lineup['player']['name'], jersey_number, match_id)
                             )
 
                         cursor.execute('SELECT position_id FROM position WHERE position_id = %s', (position_id,))
@@ -1089,8 +1077,8 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                         player = cursor.fetchone()
                         if player is None:
                             cursor.execute(
-                                'INSERT INTO player (player_id, player_name) VALUES (%s, %s)',
-                                (player_id, event.get('player', {}).get('name', None))
+                                'INSERT INTO player (player_id, player_name, match_id) VALUES (%s, %s, %s)',
+                                (player_id, event.get('player', {}).get('name', None), match_id)
                             )
 
                     if position_id is not None:

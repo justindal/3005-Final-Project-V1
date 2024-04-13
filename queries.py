@@ -175,7 +175,20 @@ def Q_1(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """ 
+    SELECT p.player_name,
+    AVG(s.statsbomb_xg) as average_xg
+    FROM event_shot s
+    JOIN player p ON s.player_id = p.player_id
+    JOIN match m ON s.match_id = m.match_id
+    JOIN competition c ON m.competition_id = c.competition_id
+    JOIN season se ON m.season_id = se.season_id
+    WHERE s.statsbomb_xg > 0
+    AND c.competition_name = 'La Liga'
+    AND se.season_name = '2020/2021'
+    GROUP BY p.player_name
+    ORDER BY average_xg DESC 
+    """
 
     # ==========================================================================
 
@@ -194,7 +207,18 @@ def Q_2(cursor, conn, execution_time):
     # ==========================================================================
     # Enter QUERY within the quotes:
 
-    query = """ """
+    query = """SELECT p.player_name,
+       COUNT(s.event_id) as number_of_shots
+FROM event_shot s
+JOIN player p ON s.player_id = p.player_id
+JOIN match m ON s.match_id = m.match_id
+JOIN competition c ON m.competition_id = c.competition_id
+JOIN season se ON m.season_id = se.season_id
+WHERE c.competition_name = 'La Liga'
+AND se.season_name = '2018/2019'
+GROUP BY p.player_name
+HAVING COUNT(s.event_id) >= 1
+ORDER BY number_of_shots DESC """
 
     # ==========================================================================
 
