@@ -481,12 +481,25 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
 
                 elif event_type_id == 14:
                     # dribble
+                    # check if outcome exists
+                    cursor.execute('SELECT outcome_id FROM outcome WHERE outcome_id = %s',
+                                      (event['dribble']['outcome']['id'],))
+                    outcome = cursor.fetchone()
+                    if outcome is None:
+                        # add outcome to database
+                        cursor.execute(
+                            'INSERT INTO outcome (outcome_id, outcome_name) VALUES (%s, %s)',
+                            (event['dribble']['outcome']['id'], event['dribble']['outcome']['name'])
+                        )
+
                     cursor.execute(
                         'INSERT INTO event_dribble (event_id, type_id, outcome_id, nutmeg, overrun, no_touch)'
                         'VALUES (%s, %s, %s, %s, %s, %s)',
-                        (event['id'], event['type']['id'], event.get('outcome', {}).get('id', None),
-                         event.get('nutmeg', None)
-                         , event.get('overrun', None), event.get('no_touch', None))
+                        (event['id'], event['type']['id'],
+                         event.get('dribble', {}).get('outcome', {}).get('id', None),
+                         event.get('dribble', {}).get('nutmeg', None),
+                         event.get('dribble', {}).get('overrun', None),
+                         event.get('dribble', {}).get('no_touch', None))
                     )
 
                 elif event_type_id == 16:
@@ -963,13 +976,21 @@ def populate_from_events(cursor: psycopg.cursor, event_file_paths: List) -> None
                         'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
                         '%s, %s, %s, %s, %s, %s, %s, %s, %s)',
                         (event.get('type', {}).get('id', None), event.get('id', None),
-                         event.get('recipient', {}).get('id', None), event.get('length', None),
-                         event.get('angle', None),
+                         event.get('pass', {}).get('recipient', {}).get('id', None),
+                         event.get('pass', {}).get('length', None),
+                         event.get('pass', {}).get('angle', None),
                          event.get('pass', {}).get('height', {}).get('id', None),
-                         event.get('end_location', [None, None])[0], event.get('end_location', [None, None])[1],
-                         event.get('assisted_shot_id', None), event.get('backheel', None), event.get('deflected', None),
-                         event.get('miscommunication', None), event.get('cross', None), event.get('cutback', None),
-                         event.get('switch', None), event.get('shot_assist', None), event.get('goal_assist', None),
+                         event.get('pass', {}).get('end_location', [None, None])[0],
+                         event.get('pass', {}).get('end_location', [None, None])[1],
+                         event.get('pass', {}).get('assisted_shot_id', None),
+                         event.get('pass', {}).get('backheel', None),
+                         event.get('pass', {}).get('deflected', None),
+                         event.get('pass', {}).get('miscommunication', None),
+                         event.get('pass', {}).get('cross', None),
+                         event.get('pass', {}).get('cutback', None),
+                         event.get('pass', {}).get('switch', None),
+                         event.get('pass', {}).get('shot_assist', None),
+                         event.get('pass', {}).get('goal_assist', None),
                          event.get('pass', {}).get('body_part', {}).get('id', None),
                          event.get('pass', {}).get('type', {}).get('id', None),
                          event.get('pass', {}).get('outcome', {}).get('id', None),
@@ -1123,7 +1144,6 @@ def populate_from_lineups(cursor: psycopg.cursor, lineup_file_paths: List[str]) 
                             (player_country,)
                         )
 
-
                     # position data
                     positions = player.get('positions', [])
                     player_position_data = positions[0] if positions else {}
@@ -1165,7 +1185,8 @@ def populate_from_lineups(cursor: psycopg.cursor, lineup_file_paths: List[str]) 
                             'SET player_name = %s, player_nickname = %s, jersey_number = %s, country_id = %s, '
                             'cards = %s, positions = %s '
                             'WHERE player_id = %s',
-                            (player_name, player_nickname, jersey_number, player_country, card_name, position_id, player_id)
+                            (player_name, player_nickname, jersey_number, player_country, card_name, position_id,
+                             player_id)
                         )
 
                     if positions:
@@ -1201,7 +1222,6 @@ def populate_from_lineups(cursor: psycopg.cursor, lineup_file_paths: List[str]) 
                         'VALUES (%s, %s, %s)',
                         (lineup['team_id'], match_id, player_id)
                     )
-
 
 
 def create_tables(cursor: psycopg.cursor):
